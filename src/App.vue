@@ -1,26 +1,159 @@
+
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+<!-- deploying dist folder for public access -->
+<!-- npm run build -->
+<!-- npm i -g serve -->
+<!-- // serve -s  dist -->
+
+  <div class="container">
+    <Header @toggle-add-task="toggleAddTask" title="Task Tracker" :showAddTask= "showAddTask"/>
+    <!-- <div v-if="showAddTask"> -->
+    <div v-show="showAddTask">
+      <AddTask @add-task="addTask"/>
+    </div>
+    
+    <Tasks @toggle-reminder="toggleReminder" @delete-task="deleteTask" :tasks = "tasks"/>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
+import Header from './components/Header'
+import Tasks from './components/Tasks'
+import AddTask from './components/AddTask'
+
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
+    Header,
+    Tasks ,
+    AddTask
+  },
+  data(){
+    return {
+      tasks: [],
+      showAddTask:false,
+    }
+  },
+  methods:{
+    toggleAddTask(){
+      this.showAddTask = !this.showAddTask
+    },
+    addTask(task){
+      this.tasks = [...this.tasks,task]
+    },
+    deleteTask(id){
+      if(confirm("Are you sure? ")){
+        this.tasks = this.tasks.filter((task)=>
+        task.id !== id
+      );
+      }      
+    },
+    toggleReminder(id){
+     this.tasks = this.tasks.map((task)=>task.id === id ? {...task,reminder: !task.reminder}: task);     
+    },
+    async fetchTasks(){
+      const res = await fetch(`api/tasks`)
+      const data = await res.json();
+      return data
+    },
+    async fetchTask(id){
+      const res = await fetch(`api/tasks/${id}`)
+      const data = await res.json();
+      return data
+    }
+  }, 
+  async created(){
+    this.tasks = await this.fetchTasks()
+    // this.tasks = [
+    //   {
+    //     id:1,
+    //     text:'Doctors Appointment',
+    //     day: 'March 1st at 2:30pm',
+    //     reminder: false
+    //   },
+    //   {
+    //     id:2,
+    //     text:'Gyms Meeting',
+    //     day: 'March 5th at 2:30pm',
+    //     reminder: true
+    //   },
+    //   {
+    //     id:3,
+    //     text:'School Friends Meeting',
+    //     day: 'March 4th at 2:30pm',
+    //     reminder: true
+    //   },
+    //   {
+    //     id:4,
+    //     text:'Football Appointment',
+    //     day: 'March 11th at 4:30pm',
+    //     reminder: false
+    //   },
+    // ]
+  },
+  
 }
+
+// import HelloWorld from './components/HelloWorld.vue'
+// import Again from './components/Again.vue'
+
+// export default {
+//   name: 'App',
+//   components: {
+//     HelloWorld,
+//     Again
+//   }
+// }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;  
+  
 }
+body{
+  font-family: 'Poppins', sans-serif;
+}
+.container{
+  max-width: 500px;
+  margin: 30px auto;
+  overflow: auto;
+  min-height: 300px;
+  border: 1px solid steelblue;
+  padding: 3px;
+  border-radius: 5px;
+}
+.btn{
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  border:none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.btn:focus{
+  outline: none;
+}
+.btn:active{
+  transform: scale(0.98);
+}
+.btn-block{
+  display: block;
+  width: 100%;
+}
+
+
+
 </style>

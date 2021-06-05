@@ -13,6 +13,10 @@ npm run serve
 ### Compiles and minifies for production
 ```
 npm run build
+-This generates the files to be deployed.
+serve -s dist // This serve the generated production files
+--json-server --watch db.json  // using fake json server.
+
 ```
 
 ### Lints and fixes files
