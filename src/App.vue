@@ -40,18 +40,47 @@ export default {
     toggleAddTask(){
       this.showAddTask = !this.showAddTask
     },
-    addTask(task){
-      this.tasks = [...this.tasks,task]
+    async addTask(task){
+      const req = await fetch('api/tasks',{
+        method: 'POST',
+        headers: {
+          'Content-type':'application/json'
+        },
+        body: JSON.stringify(task)
+      });
+      const data = await req.json();
+      // this.tasks = [...this.tasks,task]
+      this.tasks = [...this.tasks,data];
     },
-    deleteTask(id){
+    async deleteTask(id){
       if(confirm("Are you sure? ")){
-        this.tasks = this.tasks.filter((task)=>
-        task.id !== id
-      );
+        const req = await fetch(`api/tasks/${id}`,{
+          method: 'DELETE',          
+        });
+        req.status == 200 ? (this.tasks = this.tasks.filter((task)=>
+        task.id !== id)) : alert("Error deleting tasks")
+        // this.tasks = this.tasks.filter((task)=>
+        // task.id !== id
+      // );
       }      
     },
-    toggleReminder(id){
-     this.tasks = this.tasks.map((task)=>task.id === id ? {...task,reminder: !task.reminder}: task);     
+    async toggleReminder(id){
+      const taskToToggle = await this.fetchTask(id)
+      const updTask = {...taskToToggle,reminder: !taskToToggle.reminder}
+
+      const res = await fetch(`api/tasks/${id}`,{
+        method: 'PUT',
+        headers:{
+          'Content-type':'application/json'
+        },
+        body: JSON.stringify(updTask)
+      })
+
+      const data = await res.json()
+
+
+     this.tasks = this.tasks.map((task)=>task.id === id ? {...task,reminder: data.reminder}: task);     
+    //  this.tasks = this.tasks.map((task)=>task.id === id ? {...task,reminder: !task.reminder}: task);     
     },
     async fetchTasks(){
       const res = await fetch(`api/tasks`)
@@ -65,7 +94,7 @@ export default {
     }
   }, 
   async created(){
-    this.tasks = await this.fetchTasks()
+    this.tasks = await this.fetchTasks();
     // this.tasks = [
     //   {
     //     id:1,
